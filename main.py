@@ -1,6 +1,11 @@
 from operation import display_products, sell_products, restock_products, add_new_product
 
 def main():
+    """
+    This function  runs the main menu loop foe WeCare Skin Management System
+    It doesnot have any arguments
+    It doesnot return any value
+    """
     while True:
         try:
             print("\n--- WeCare Store Management ---")
