@@ -132,3 +132,106 @@ def sell_products():
         print("Unexpected error: " + str(e))
         return None
 
+# Restock products
+def restock_products():
+    """
+    Restocks products, updates inventory, and generates a restock invoice.
+    Arguments: None
+    Return Value: None
+    """
+    try:
+        products = read_products()
+        vendor = input("Enter vendor/supplier name: ").strip()
+        if not vendor:
+            raise ValueError("Vendor name cannot be empty")
+
+        now = datetime.now()
+        filename = INVOICE_FOLDER + "/restock_" + vendor + "_" + now.strftime('%Y%m%d_%H%M%S') + ".txt"
+        subtotal = 0
+        vat_rate = 0.13
+        new_items = []
+
+        while True:
+            name = input("Enter product name to restock (or 'done' to finish): ").strip()
+            if name == 'done':
+                break
+            if not name:
+                print("Error: Product name cannot be empty")
+                continue
+
+            brand = input("Enter brand: ").strip()
+            if not brand:
+                print("Error: Brand cannot be empty")
+                continue
+
+            try:
+                quantity = int(input("Enter quantity to add: "))
+                if quantity <= 0:
+                    raise ValueError("Quantity must be positive")
+            except ValueError:
+                print("Error: Quantity must be a valid positive integer")
+                continue
+
+            try:
+                cost_price = float(input("Enter cost price: "))
+                if cost_price <= 0:
+                    raise ValueError("Cost price must be positive")
+            except ValueError:
+                print("Error: Cost price must be a valid positive number")
+                continue
+
+            origin = input("Enter country of origin: ").strip()
+            if not origin:
+                print("Error: Country of origin cannot be empty")
+                continue
+
+            for p in products:
+                if p['name'] == name and p['brand'] == brand:
+                    p['quantity'] += quantity
+                    p['cost_price'] = cost_price
+                    break
+            else:
+                products.append({
+                    'name': name,
+                    'brand': brand,
+                    'quantity': quantity,
+                    'cost_price': cost_price,
+                    'origin': origin
+                })
+            subtotal += quantity * cost_price
+            new_items.append((name, brand, quantity, cost_price))
+
+        if new_items:
+            vat_amount = subtotal * vat_rate
+            total = subtotal + vat_amount
+            content = "Vendor Name: " + vendor + "\n"
+            content += "Date: " + now.strftime('%Y-%m-%d %H:%M:%S') + "\n\n"   
+            content += "Items Restocked:\n"
+            content += "+-------------------------+---------------+--------+---------+---------+\n"
+            content += "| Product Name            | Brand         | Qty    | Price   | Amount  |\n"
+            content += "+-------------------------+---------------+--------+---------+---------+\n"
+            for name, brand, qty, price in new_items:
+                name_padded = name + " " * (23 - len(name))
+                brand_padded = brand + " " * (13 - len(brand))
+                qty_padded = str(qty) + " " * (6 - len(str(qty)))
+                price_padded = str(int(price)) + " " * (7 - len(str(int(price))))
+                amount_padded = str(int(qty * price)) + " " * (7 - len(str(int(qty * price))))
+                content += "| " + name_padded + " | " + brand_padded + " | " + qty_padded + " | " + price_padded + " | " + amount_padded + " |\n"
+            content += "+-------------------------+---------------+--------+---------+---------+\n"
+            content += "\nSubtotal: Rs " + str(int(subtotal)) + "\n"
+            content += "VAT (13%): Rs " + str(int(vat_amount)) + "\n"
+            content += "Total Amount: Rs " + str(int(total)) + "\n"
+            try:
+                generate_invoice(filename, content)
+                print("Restock invoice generated: " + filename)
+                write_products(products)
+            except FileNotFoundError:
+                print("Error: Could not write invoice file due to file access issue")
+            except Exception as e:
+                print("Unexpected error generating invoice: " + str(e))
+
+    except ValueError as ve:
+        print("Error: Invalid input - " + str(ve))
+    except Exception as e:
+        print("Unexpected error: " + str(e))
+
