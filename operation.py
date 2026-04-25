@@ -235,3 +235,61 @@ def restock_products():
     except Exception as e:
         print("Unexpected error: " + str(e))
 
+# Add a new product
+def add_new_product():
+    """
+    Adds a new product to the inventory and generates an invoice.
+    Arguments: None
+    Return Value: None
+    """
+    try:
+        products = read_products()
+
+        print("\n--- Add New Product ---")
+        name = input("Enter product name: ").strip()
+        if not name:
+            raise ValueError("Product name cannot be empty")
+
+        brand = input("Enter brand: ").strip()
+        if not brand:
+            raise ValueError("Brand cannot be empty")
+
+        try:
+            quantity = int(input("Enter quantity: "))
+            if quantity < 0:
+                raise ValueError("Quantity cannot be negative")
+        except ValueError as e:
+            if str(e) == "Quantity cannot be negative":
+                raise
+            raise ValueError("Quantity must be a valid integer")
+
+        try:
+            cost_price = float(input("Enter cost price: "))
+            if cost_price <= 0:
+                raise ValueError("Cost price must be positive")
+        except ValueError as e:
+            if str(e) == "Cost price must be positive":
+                raise
+            raise ValueError("Cost price must be a valid number")
+
+        origin = input("Enter country of origin: ").strip()
+        if not origin:
+            raise ValueError("Country of origin cannot be empty")
+
+        # Check if product already exists
+        for p in products:
+            if p['name'] == name and p['brand'] == brand:
+                print("This product already exists. Please restock it instead.")
+                return
+
+        # Add the new product
+        new_product = {
+            'name': name,
+            'brand': brand,
+            'quantity': quantity,
+            'cost_price': cost_price,
+            'origin': origin
+        }
+        products.append(new_product)
+
+        
