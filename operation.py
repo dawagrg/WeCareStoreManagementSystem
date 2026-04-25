@@ -292,4 +292,32 @@ def add_new_product():
         }
         products.append(new_product)
 
+        # Generate invoice for the new product
+        vendor = input("Enter vendor/supplier name for this product: ").strip()
+        if not vendor:
+            raise ValueError("Vendor name cannot be empty")
+
+        now = datetime.now()
+        filename = INVOICE_FOLDER + "/new_product_" + vendor + "_" + now.strftime('%Y%m%d_%H%M%S') + ".txt"
+        subtotal = quantity * cost_price
+        vat_rate = 0.13  # 13% VAT
+        vat_amount = subtotal * vat_rate
+        total = subtotal + vat_amount
+        content = "Vendor Name: " + vendor + "\n"
+        content += "Date: " + now.strftime('%Y-%m-%d %H:%M:%S') + "\n\n"
+        content += "New Product Added:\n"
+        content += "+-------------------------+---------------+--------+---------+---------+\n"
+        content += "| Product Name            | Brand         | Qty    | Price   | Amount  |\n"
+        content += "+-------------------------+---------------+--------+---------+---------+\n"
+        name_padded = name + " " * (23 - len(name))
+        brand_padded = brand + " " * (13 - len(brand))
+        qty_padded = str(quantity) + " " * (6 - len(str(quantity)))
+        price_padded = str(int(cost_price)) + " " * (7 - len(str(int(cost_price))))
+        subtotal_padded = str(int(subtotal)) + " " * (7 - len(str(int(subtotal))))
+        content += "| " + name_padded + " | " + brand_padded + " | " + qty_padded + " | " + price_padded + " | " + subtotal_padded + " |\n"
+        content += "+-------------------------+---------------+--------+---------+---------+\n"
+        content += "\nSubtotal: Rs " + str(int(subtotal)) + "\n"
+        content += "VAT (13%): Rs " + str(int(vat_amount)) + "\n"
+        content += "Total Amount: Rs " + str(int(total)) + "\n"
+
         
