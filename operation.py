@@ -320,4 +320,20 @@ def add_new_product():
         content += "VAT (13%): Rs " + str(int(vat_amount)) + "\n"
         content += "Total Amount: Rs " + str(int(total)) + "\n"
 
-        
+        # Save the invoice and product list
+        try:
+            generate_invoice(filename, content)
+            write_products(products)
+            print("New product '" + name + "' added successfully!")
+            print("Invoice generated: " + filename)
+        except FileNotFoundError:
+            print("Error: Could not write invoice or product file due to file access issue")
+        except Exception as e:
+            print("Unexpected error generating invoice or saving products: " + str(e))
+
+    except ValueError as ve:
+        print("Error: Invalid input - " + str(ve))
+    except FileNotFoundError:
+        print("Error: Could not access product file")
+    except Exception as e:
+        print("Unexpected error: " + str(e))
